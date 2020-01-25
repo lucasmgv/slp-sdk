@@ -38,7 +38,7 @@
     "axios": "0.19.0",
     "babel-register": "^6.26.0",
     "bignumber.js": "^8.0.2",
-    "bitbox-sdk": "8.10.1",
+    "bitbox-sdk": "git://github.com/lucasmgv/bitbox-sdk.git#fix/address_transactions_pagination",
     "chalk": "^2.3.0",
     "clear": "0.1.0",
     "commander": "^2.13.0",
@@ -47,7 +47,7 @@
     "mkdirp": "^0.5.1",
     "node-emoji": "^1.8.1",
     "repl.history": "^0.1.4",
-    "slpjs": "^0.23.0",
+    "slpjs": "git://github.com/lucasmgv/slpjs.git#master",
     "touch": "^3.1.0"
   },
   "devDependencies": {

@@ -1,50 +1,51 @@
 // imports
-import axios from "axios"
+import axios from "axios";
 
-import { BITBOX } from "bitbox-sdk"
-const bitbox = new BITBOX()
-const BITBOXUtil = require("bitbox-sdk").Util
+import { BITBOX } from "bitbox-sdk";
+import { IBulkTransaction } from "./interfaces/SLPInterfaces";
+const bitbox = new BITBOX();
+const BITBOXUtil = require("bitbox-sdk").Util;
 
 // consts
-const util = require("util")
-util.inspect.defaultOptions = { depth: 1 }
+const util = require("util");
+util.inspect.defaultOptions = { depth: 1 };
 
-const BigNumber = require("bignumber.js")
+const BigNumber = require("bignumber.js");
 
 class Util extends BITBOXUtil {
-  restURL: string
+  restURL: string;
   constructor(restURL?: string) {
-    super(restURL)
-    this.restURL = restURL
+    super(restURL);
+    this.restURL = restURL;
   }
 
   async list(id?: string | string[]): Promise<Object | Array<Object>> {
-    let path: string
-    let method: string
+    let path: string;
+    let method: string;
     if (!id) {
-      method = "get"
-      path = `${this.restURL}slp/list`
+      method = "get";
+      path = `${this.restURL}slp/list`;
     } else if (typeof id === "string") {
-      method = "get"
-      path = `${this.restURL}slp/list/${id}`
+      method = "get";
+      path = `${this.restURL}slp/list/${id}`;
     } else if (typeof id === "object") {
-      method = "post"
-      path = `${this.restURL}slp/list`
+      method = "post";
+      path = `${this.restURL}slp/list`;
     }
 
     try {
-      let response: any
+      let response: any;
       if (method === "get") {
-        response = await axios.get(path)
+        response = await axios.get(path);
       } else {
         response = await axios.post(path, {
           tokenIds: id
-        })
+        });
       }
-      return response.data
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
@@ -53,108 +54,151 @@ class Util extends BITBOXUtil {
     try {
       // Single address.
       if (typeof address === "string") {
-        const path: string = `${this.restURL}slp/balancesForAddress/${address}`
+        const path: string = `${this.restURL}slp/balancesForAddress/${address}`;
 
-        const response = await axios.get(path)
-        return response.data
+        const response = await axios.get(path);
+        return response.data;
 
         // Array of addresses.
       } else if (Array.isArray(address)) {
-        const path: string = `${this.restURL}slp/balancesForAddress`
+        const path: string = `${this.restURL}slp/balancesForAddress`;
 
         // Dev note: must use axios.post for unit test stubbing.
         const response: any = await axios.post(path, {
           addresses: address
-        })
+        });
 
-        return response.data
+        return response.data;
       }
 
-      throw new Error(`Input address must be a string or array of strings.`)
+      throw new Error(`Input address must be a string or array of strings.`);
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
   // Retrieve token balances for a given tokenId.
   async balancesForToken(tokenId: string): Promise<Object> {
-    const path: string = `${this.restURL}slp/balancesForToken/${tokenId}`
+    const path: string = `${this.restURL}slp/balancesForToken/${tokenId}`;
 
     try {
-      const response = await axios.get(path)
-      return response.data
+      const response = await axios.get(path);
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
   // Retrieve a balance for a specific address and token ID
   async balance(address: string, tokenId: string): Promise<Object> {
-    const path: string = `${this.restURL}slp/balance/${address}/${tokenId}`
+    const path: string = `${this.restURL}slp/balance/${address}/${tokenId}`;
 
     try {
-      const response = await axios.get(path)
-      return response.data
+      const response = await axios.get(path);
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
   async validateTxid(txid: string | string[]): Promise<Object> {
-    const path: string = `${this.restURL}slp/validateTxid`
+    const path: string = `${this.restURL}slp/validateTxid`;
 
-    let txids: string[]
-    if (typeof txid === "string") txids = [txid]
-    else txids = txid
+    let txids: string[];
+    if (typeof txid === "string") txids = [txid];
+    else txids = txid;
 
     try {
       const response = await axios.post(path, {
         txids: txids
-      })
-      return response.data
+      });
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
-  async tokenStats(tokenId: string): Promise<Object> {
-    const path: string = `${this.restURL}slp/tokenStats/${tokenId}`
+  async tokenStats(tokenId: string | string[]): Promise<Object> {
+    let path: string;
+    let method: string;
+    if (typeof tokenId === "string") {
+      method = "get";
+      path = `${this.restURL}slp/tokenStats/${tokenId}`;
+    } else if (typeof tokenId === "object") {
+      method = "post";
+      path = `${this.restURL}slp/tokenStats`;
+    }
 
     try {
-      const response = await axios.get(path)
-      return response.data
+      let response: any;
+      if (method === "get") {
+        response = await axios.get(path);
+      } else {
+        response = await axios.post(path, {
+          tokenIds: tokenId
+        });
+      }
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
   // Retrieve token transactions for a given tokenId and address.
   async transactions(tokenId: string, address: string): Promise<Object> {
-    const path: string = `${this.restURL}slp/transactions/${tokenId}/${address}`
+    const path: string = `${this.restURL}slp/transactions/${tokenId}/${address}`;
 
     try {
-      const response = await axios.get(path)
-      return response.data
+      const response = await axios.get(path);
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
-  async burnTotal(transactionId: string): Promise<Object> {
-    const path: string = `${this.restURL}slp/burnTotal/${transactionId}`
+  // Bulk SLP transactions by tokenId and address.
+  async bulkTransactions(data: Array<IBulkTransaction>): Promise<Object> {
+    const path: string = `${this.restURL}slp/transactions`;
 
     try {
-      const response = await axios.get(path)
-      return response.data
+      const response = await axios.post(path, data);
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
+    }
+  }
+
+  async burnTotal(transactionId: string | Array<string>): Promise<Object> {
+    let path: string;
+    let method: string;
+    if (typeof transactionId === "string") {
+      method = "get";
+      path = `${this.restURL}slp/burnTotal/${transactionId}`;
+    } else if (typeof transactionId === "object") {
+      method = "post";
+      path = `${this.restURL}slp/burnTotal`;
+    }
+
+    try {
+      let response: any;
+      if (method === "get") {
+        response = await axios.get(path);
+      } else {
+        response = await axios.post(path, {
+          txids: transactionId
+        });
+      }
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
@@ -164,39 +208,39 @@ class Util extends BITBOXUtil {
   async decodeOpReturn(txid: string) {
     try {
       if (!txid || txid === "" || typeof txid !== "string")
-        throw new Error(`txid string must be included.`)
+        throw new Error(`txid string must be included.`);
 
-      const path: string = `${this.restURL}rawtransactions/getRawTransaction/${txid}?verbose=true`
-      const lokadIdHex = "534c5000"
+      const path: string = `${this.restURL}rawtransactions/getRawTransaction/${txid}?verbose=true`;
+      const lokadIdHex = "534c5000";
 
       // Create an empty output object that will be populated with metadata.
-      const outObj: any = {}
+      const outObj: any = {};
 
       // Retrieve the transaction object from the full node.
-      const response = await axios.get(path)
-      const txDetails = response.data
+      const response = await axios.get(path);
+      const txDetails = response.data;
       //console.log(`txDetails: ${JSON.stringify(txDetails,null,2)}`)
 
       // Retrieve the OP_RETURN data.
       const script = bitbox.Script.toASM(
         Buffer.from(txDetails.vout[0].scriptPubKey.hex, "hex")
-      ).split(" ")
+      ).split(" ");
 
-      if (script[0] !== "OP_RETURN") throw new Error("Not an OP_RETURN")
+      if (script[0] !== "OP_RETURN") throw new Error("Not an OP_RETURN");
 
-      if (script[1] !== lokadIdHex) throw new Error("Not a SLP OP_RETURN")
+      if (script[1] !== lokadIdHex) throw new Error("Not a SLP OP_RETURN");
 
       // Validate token type.
       if (script[2] !== "OP_1" && script[2] !== "0001") {
         // NOTE: bitcoincashlib-js converts hex 01 to OP_1 due to BIP62.3 enforcement
-        throw new Error("Unknown token type")
+        throw new Error("Unknown token type");
       }
-      outObj.tokenType = 1
+      outObj.tokenType = 1;
 
       const type = Buffer.from(script[3], "hex")
         .toString("ascii")
-        .toLowerCase()
-      script[3] = type
+        .toLowerCase();
+      script[3] = type;
       //console.log(`type: ${type}`)
 
       // Decode a GENSIS SLP transaction.
@@ -204,88 +248,88 @@ class Util extends BITBOXUtil {
         //console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
         //console.log(`script: ${JSON.stringify(script, null, 2)}`)
 
-        outObj.transactionType = "genesis"
+        outObj.transactionType = "genesis";
 
         // Convert the next four entries into ascii.
         for (let i = 4; i < 8; i++)
-          script[i] = Buffer.from(script[i], "hex").toString("ascii")
+          script[i] = Buffer.from(script[i], "hex").toString("ascii");
         //.toLowerCase()
 
-        outObj.ticker = script[4]
-        outObj.name = script[5]
-        outObj.documentUrl = script[6]
-        outObj.documentHash = script[7]
+        outObj.ticker = script[4];
+        outObj.name = script[5];
+        outObj.documentUrl = script[6];
+        outObj.documentHash = script[7];
 
         // decimal precision of the token.
         if (typeof script[8] === "string" && script[8].startsWith("OP_"))
-          script[8] = parseInt(script[8].slice(3)).toString(16)
+          script[8] = parseInt(script[8].slice(3)).toString(16);
 
-        const decimals = Number(script[8])
-        outObj.decimals = decimals
+        const decimals = Number(script[8]);
+        outObj.decimals = decimals;
 
         // Mint Baton vout.
         if (typeof script[9] === "string" && script[9].startsWith("OP_"))
-          script[9] = parseInt(script[9].slice(3)).toString(16)
-        outObj.mintBatonVout = Number(script[9])
+          script[9] = parseInt(script[9].slice(3)).toString(16);
+        outObj.mintBatonVout = Number(script[9]);
 
         // Initial quantity of tokens created.
-        let qty = new BigNumber(script[10], 16)
-        qty = qty / Math.pow(10, decimals)
-        script[10] = qty
-        outObj.initialQty = qty
+        let qty = new BigNumber(script[10], 16);
+        qty = qty / Math.pow(10, decimals);
+        script[10] = qty;
+        outObj.initialQty = qty;
 
         // Address initial tokens were sent to.
-        outObj.tokensSentTo = txDetails.vout[1].scriptPubKey.addresses[0]
+        outObj.tokensSentTo = txDetails.vout[1].scriptPubKey.addresses[0];
 
         // Mint baton address holder.
         if (!outObj.mintBatonVout) {
-          outObj.batonHolder = "NEVER_CREATED"
+          outObj.batonHolder = "NEVER_CREATED";
         } else {
           outObj.batonHolder =
-            txDetails.vout[outObj.mintBatonVout].scriptPubKey.addresses[0]
+            txDetails.vout[outObj.mintBatonVout].scriptPubKey.addresses[0];
         }
 
         // Mint type transaction
       } else if (type === "mint") {
         //console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
 
-        outObj.transactionType = "mint"
-        outObj.tokenId = script[4]
+        outObj.transactionType = "mint";
+        outObj.tokenId = script[4];
 
         // Locate the vout UTXO containing the minting baton.
-        let mintBatonVout = 0
+        let mintBatonVout = 0;
         // Dev note: Haven't seen this if-statement in the wild. Copied from
         // Badger Wallet code.
         if (typeof script[5] === "string" && script[5].startsWith("OP_"))
-          mintBatonVout = parseInt(script[5].slice(3))
+          mintBatonVout = parseInt(script[5].slice(3));
         // This is the common use case with slp-sdk examples.
-        else mintBatonVout = parseInt(script[5])
+        else mintBatonVout = parseInt(script[5]);
 
-        outObj.mintBatonVout = mintBatonVout
+        outObj.mintBatonVout = mintBatonVout;
 
         // Check if baton was passed or destroyed.
         // Dev Note: There should be some more extensive checking here. The most
         // common way of 'burning' the minting baton is to set script[5] to a
         // value of 0, but it could also point to a non-existant vout.
         // TODO: Add checking if script[5] refers to a non-existant vout.
-        outObj.batonStillExists = false // false by default.
-        if (mintBatonVout > 1) outObj.batonStillExists = true
+        outObj.batonStillExists = false; // false by default.
+        if (mintBatonVout > 1) outObj.batonStillExists = true;
 
         // Parse the quantity generated in this minting operation.
         // Returns a string. But without the decimals information included,
         // I'm not sure how to properly represent the quantity.
         if (typeof script[6] === "string" && script[6].startsWith("OP_"))
-          script[6] = parseInt(script[6].slice(3)).toString(16)
+          script[6] = parseInt(script[6].slice(3)).toString(16);
 
-        outObj.quantity = new BigNumber(script[6], 16)
+        outObj.quantity = new BigNumber(script[6], 16);
 
         // Report the reciever of the minted tokens.
-        outObj.tokensSentTo = txDetails.vout[1].scriptPubKey.addresses[0]
+        outObj.tokensSentTo = txDetails.vout[1].scriptPubKey.addresses[0];
 
         // Report the address that controls the mint baton.
         if (outObj.batonStillExists) {
           outObj.batonHolder =
-            txDetails.vout[mintBatonVout].scriptPubKey.addresses[0]
+            txDetails.vout[mintBatonVout].scriptPubKey.addresses[0];
         }
 
         // Send tokens.
@@ -293,40 +337,40 @@ class Util extends BITBOXUtil {
         //console.log(`txDetails: ${JSON.stringify(txDetails, null, 2)}`)
         //console.log(`script: ${JSON.stringify(script,null,2)}`)
 
-        if (script.length <= 4) throw new Error("Not a SLP txout")
+        if (script.length <= 4) throw new Error("Not a SLP txout");
 
-        outObj.transactionType = "send"
+        outObj.transactionType = "send";
 
         // Retrieve the token ID.
-        outObj.tokenId = script[4]
+        outObj.tokenId = script[4];
 
         // Loop through each output.
-        const spendData = []
+        const spendData = [];
         for (let i = 5; i < script.length; i++) {
-          let thisScript = script[i]
-          const spendObj: any = {}
+          let thisScript = script[i];
+          const spendObj: any = {};
 
           if (typeof thisScript === "string" && thisScript.startsWith("OP_"))
-            thisScript = parseInt(thisScript.slice(3)).toString(16)
+            thisScript = parseInt(thisScript.slice(3)).toString(16);
 
           // Compute the quantity of tokens.
-          spendObj.quantity = new BigNumber(thisScript, 16)
+          spendObj.quantity = new BigNumber(thisScript, 16);
 
           // Calculate which vouts are SLP UTXOs.
-          const thisVout = i - 4
-          spendObj.sentTo = txDetails.vout[thisVout].scriptPubKey.addresses[0]
-          spendObj.vout = thisVout
+          const thisVout = i - 4;
+          spendObj.sentTo = txDetails.vout[thisVout].scriptPubKey.addresses[0];
+          spendObj.vout = thisVout;
 
-          spendData.push(spendObj)
+          spendData.push(spendObj);
         }
 
-        outObj.spendData = spendData
+        outObj.spendData = spendData;
       }
 
-      return outObj
+      return outObj;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
@@ -341,46 +385,45 @@ class Util extends BITBOXUtil {
   async isTokenUtxo(utxos: Array<any>): Promise<Object> {
     try {
       // Throw error if input is not an array.
-      if (!Array.isArray(utxos)) throw new Error(`Input must be an array.`)
+      if (!Array.isArray(utxos)) throw new Error(`Input must be an array.`);
 
       // Loop through each element in the array and spot check the required
       // properties.
       for (let i = 0; i < utxos.length; i++) {
-        const thisUtxo = utxos[i]
+        const thisUtxo = utxos[i];
 
         // Throw error if utxo does not have a satoshis property.
         if (!thisUtxo.satoshis)
-          throw new Error(`utxo ${i} does not have a satoshis property.`)
+          throw new Error(`utxo ${i} does not have a satoshis property.`);
 
         // Throw error if utxo does not have a txid property.
         if (!thisUtxo.txid)
-          throw new Error(`utxo ${i} does not have a txid property.`)
+          throw new Error(`utxo ${i} does not have a txid property.`);
       }
 
       // Create an array of txid strings to feed to validateTxid
-      const txids = utxos.map(x => x.txid)
+      const txids = utxos.map(x => x.txid);
 
       // Validate the array of txids.
-      let validations: any = await this.validateTxid(txids)
+      let validations: any = await this.validateTxid(txids);
       //console.log(`validations: ${JSON.stringify(validations,null,2)}`)
 
       // Extract the boolean result
       validations = validations.map((x: any) => {
-        if (x !== null)
-          return x.valid;
+        if (x !== null) return x.valid;
 
         return false;
-      })
+      });
 
       // Loop through each element and compute final validation on any that
       // returned true.
       for (let i = 0; i < utxos.length; i++) {
-        const thisUtxo = utxos[i]
-        const thisValidation = validations[i]
+        const thisUtxo = utxos[i];
+        const thisValidation = validations[i];
 
         // Only need to worry about validations that are still true.
         if (thisValidation) {
-          const slpData = await this.decodeOpReturn(thisUtxo.txid)
+          const slpData = await this.decodeOpReturn(thisUtxo.txid);
           //console.log(`slpData: ${JSON.stringify(slpData,null,2)}`)
 
           // Handle Genesis and Mint SLP transactions.
@@ -393,16 +436,16 @@ class Util extends BITBOXUtil {
               thisUtxo.vout !== 1 // UTXO is not the reciever of the genesis or mint tokens.
             )
               // Can safely be marked as false.
-              validations[i] = false
+              validations[i] = false;
           } else if (slpData.transactionType === "send") {
             // Filter out any vouts that match.
             const voutMatch = slpData.spendData.filter(
               (x: any) => thisUtxo.vout === x.vout
-            )
+            );
             //console.log(`voutMatch: ${JSON.stringify(voutMatch, null, 2)}`)
 
             // If there are no vout matches, the UTXO can safely be marked as false.
-            if (voutMatch.length === 0) validations[i] = false
+            if (voutMatch.length === 0) validations[i] = false;
           }
         }
 
@@ -414,10 +457,10 @@ class Util extends BITBOXUtil {
         //if (thisUtxo.satoshis > 546) validations[i] = false
       }
 
-      return validations
+      return validations;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 
@@ -430,36 +473,36 @@ class Util extends BITBOXUtil {
   async tokenUtxoDetails(utxos: any) {
     try {
       // Throw error if input is not an array.
-      if (!Array.isArray(utxos)) throw new Error(`Input must be an array.`)
+      if (!Array.isArray(utxos)) throw new Error(`Input must be an array.`);
 
       // Loop through each element in the array and validate the input before
       // further processing.
       for (let i = 0; i < utxos.length; i++) {
-        const thisUtxo = utxos[i]
+        const thisUtxo = utxos[i];
 
         // Throw error if utxo does not have a satoshis property.
         if (!thisUtxo.satoshis)
-          throw new Error(`utxo ${i} does not have a satoshis property.`)
+          throw new Error(`utxo ${i} does not have a satoshis property.`);
 
         // Throw error if utxo does not have a txid property.
         if (!thisUtxo.txid)
-          throw new Error(`utxo ${i} does not have a txid property.`)
+          throw new Error(`utxo ${i} does not have a txid property.`);
       }
 
       // Output array
-      const outAry = []
+      const outAry = [];
 
       // Loop through each utxo
       for (let i = 0; i < utxos.length; i++) {
-        const utxo = utxos[i]
+        const utxo = utxos[i];
         // console.log(`utxo: ${JSON.stringify(utxo,null,2)}`)
 
         // Get raw transaction data from the full node and attempt to decode
         // the OP_RETURN data.
         // If there is no OP_RETURN, mark the UTXO as false.
-        let slpData: any = false
+        let slpData: any = false;
         try {
-          slpData = await this.decodeOpReturn(utxo.txid)
+          slpData = await this.decodeOpReturn(utxo.txid);
           // console.log(`slpData: ${JSON.stringify(slpData, null, 2)}`)
         } catch (err) {
           // console.log(`decodeOpReturn err: `, err)
@@ -470,11 +513,11 @@ class Util extends BITBOXUtil {
           ) {
             // An error will be thrown if the txid is not SLP.
             // Mark as false and continue the loop.
-            outAry.push(false)
+            outAry.push(false);
 
-            continue
+            continue;
           } else {
-            throw err
+            throw err;
           }
         }
 
@@ -486,21 +529,21 @@ class Util extends BITBOXUtil {
             utxo.vout !== 1 // UTXO is not the reciever of the genesis or mint tokens.
           ) {
             // Can safely be marked as false.
-            outAry[i] = false
+            outAry[i] = false;
           }
 
           // If this is a valid SLP UTXO, then return the decoded OP_RETURN data.
           else {
-            utxo.tokenType = "minting-baton"
-            utxo.tokenId = utxo.txid
-            utxo.tokenTicker = slpData.ticker
-            utxo.tokenName = slpData.name
-            utxo.tokenDocumentUrl = slpData.documentUrl
-            utxo.tokenDocumentHash = slpData.documentHash
-            utxo.decimals = slpData.decimals
+            utxo.tokenType = "minting-baton";
+            utxo.tokenId = utxo.txid;
+            utxo.tokenTicker = slpData.ticker;
+            utxo.tokenName = slpData.name;
+            utxo.tokenDocumentUrl = slpData.documentUrl;
+            utxo.tokenDocumentHash = slpData.documentHash;
+            utxo.decimals = slpData.decimals;
 
             // something
-            outAry[i] = utxo
+            outAry[i] = utxo;
           }
         }
 
@@ -511,31 +554,31 @@ class Util extends BITBOXUtil {
             utxo.vout !== 1 // UTXO is not the reciever of the genesis or mint tokens.
           ) {
             // Can safely be marked as false.
-            outAry[i] = false
+            outAry[i] = false;
           }
 
           // If UTXO passes validation, then return formatted token data.
           else {
-            const genesisData = await this.decodeOpReturn(slpData.tokenId)
+            const genesisData = await this.decodeOpReturn(slpData.tokenId);
 
             // Hydrate the UTXO object with information about the SLP token.
-            utxo.utxoType = "token"
-            utxo.transactionType = "mint"
-            utxo.tokenId = slpData.tokenId
+            utxo.utxoType = "token";
+            utxo.transactionType = "mint";
+            utxo.tokenId = slpData.tokenId;
 
-            utxo.tokenTicker = genesisData.ticker
-            utxo.tokenName = genesisData.name
-            utxo.tokenDocumentUrl = genesisData.documentUrl
-            utxo.tokenDocumentHash = genesisData.documentHash
-            utxo.decimals = genesisData.decimals
+            utxo.tokenTicker = genesisData.ticker;
+            utxo.tokenName = genesisData.name;
+            utxo.tokenDocumentUrl = genesisData.documentUrl;
+            utxo.tokenDocumentHash = genesisData.documentHash;
+            utxo.decimals = genesisData.decimals;
 
-            utxo.mintBatonVout = slpData.mintBatonVout
-            utxo.batonStillExists = slpData.batonStillExists
+            utxo.mintBatonVout = slpData.mintBatonVout;
+            utxo.batonStillExists = slpData.batonStillExists;
 
             // Calculate the real token quantity.
-            utxo.tokenQty = slpData.quantity / Math.pow(10, utxo.decimals)
+            utxo.tokenQty = slpData.quantity / Math.pow(10, utxo.decimals);
 
-            outAry[i] = utxo
+            outAry[i] = utxo;
           }
         }
 
@@ -544,55 +587,55 @@ class Util extends BITBOXUtil {
           // Filter out any vouts that match.
           const voutMatch = slpData.spendData.filter(
             (x: any) => utxo.vout === x.vout
-          )
+          );
           // console.log(`voutMatch: ${JSON.stringify(voutMatch, null, 2)}`)
 
           // If there are no vout matches, the UTXO can safely be marked as false.
           if (voutMatch.length === 0) {
-            outAry[i] = false
+            outAry[i] = false;
           }
 
           // If UTXO passes validation, then return formatted token data.
           else {
-            const genesisData = await this.decodeOpReturn(slpData.tokenId)
+            const genesisData = await this.decodeOpReturn(slpData.tokenId);
             // console.log(`genesisData: ${JSON.stringify(genesisData, null, 2)}`)
 
             // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
             // Hydrate the UTXO object with information about the SLP token.
-            utxo.utxoType = "token"
-            utxo.transactionType = "send"
-            utxo.tokenId = slpData.tokenId
-            utxo.tokenTicker = genesisData.ticker
-            utxo.tokenName = genesisData.name
-            utxo.tokenDocumentUrl = genesisData.documentUrl
-            utxo.tokenDocumentHash = genesisData.documentHash
-            utxo.decimals = genesisData.decimals
+            utxo.utxoType = "token";
+            utxo.transactionType = "send";
+            utxo.tokenId = slpData.tokenId;
+            utxo.tokenTicker = genesisData.ticker;
+            utxo.tokenName = genesisData.name;
+            utxo.tokenDocumentUrl = genesisData.documentUrl;
+            utxo.tokenDocumentHash = genesisData.documentHash;
+            utxo.decimals = genesisData.decimals;
 
             // Calculate the real token quantity.
-            utxo.tokenQty = voutMatch[0].quantity / Math.pow(10, utxo.decimals)
+            utxo.tokenQty = voutMatch[0].quantity / Math.pow(10, utxo.decimals);
 
             // console.log(`utxo: ${JSON.stringify(utxo, null, 2)}`)
 
-            outAry[i] = utxo
+            outAry[i] = utxo;
           }
         }
 
         // Finally, validate the SLP txid with SLPDB.
         if (outAry[i]) {
-          const isValid: any = await this.validateTxid(utxo.txid)
+          const isValid: any = await this.validateTxid(utxo.txid);
           // console.log(`isValid: ${JSON.stringify(isValid, null, 2)}`)
 
-          outAry[i].isValid = isValid[0].valid
+          outAry[i].isValid = isValid[0].valid;
         }
       }
 
-      return outAry
+      return outAry;
     } catch (error) {
-      if (error.response && error.response.data) throw error.response.data
-      throw error
+      if (error.response && error.response.data) throw error.response.data;
+      throw error;
     }
   }
 }
 
-export default Util
+export default Util;

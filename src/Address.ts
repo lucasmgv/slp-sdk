@@ -138,7 +138,7 @@ class Address extends BITBOXAddress {
     return tmpBITBOX.Address.unconfirmed(address)
   }
 
-  async transactions(address: string | Array<string>): Promise<Object> {
+  async transactions(address: string | Array<string>, page: number = 0): Promise<Object> {
     let tmpBITBOX: any = new BITBOX({ restURL: this.restURL })
     let network: string
     if (typeof address === "string")
@@ -150,7 +150,7 @@ class Address extends BITBOXAddress {
       return tmpBITBOX.Address.transactions(cashAddr)
     }
     address = address.map((address: string) => utils.toCashAddress(address))
-    return tmpBITBOX.Address.transactions(address)
+    return tmpBITBOX.Address.transactions(address, page)
   }
 
   _ensureValidAddress(address: string): any {
