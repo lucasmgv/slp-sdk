@@ -1,3 +1,8 @@
+/*
+  This library is concerned with the Token Type 1 defined in this specification:
+  https://github.com/simpleledger/slp-specifications/blob/master/slp-token-type-1.md
+*/
+
 // require deps
 // imports
 import { BITBOX } from "bitbox-sdk"
@@ -312,6 +317,12 @@ class TokenType1 {
     // fundingAddress, tokenReceiverAddress and batonReceiverAddress must be simpleledger format
     // bchChangeReceiverAddress can be either simpleledger or cashAddr format
     // validate fundingAddress format
+    // single fundingAddress
+
+    if (config.fundingAddress && !Array.isArray(config.fundingAddress)) {
+      if (!addy.isSLPAddress(config.fundingAddress))
+        throw Error("Token Receiver Address must be simpleledger format")
+    }
 
     // bulk fundingAddress
     if (config.fundingAddress && Array.isArray(config.fundingAddress)) {
@@ -326,9 +337,11 @@ class TokenType1 {
     // single tokenReceiverAddress
     if (
       config.tokenReceiverAddress &&
-      !addy.isSLPAddress(config.tokenReceiverAddress)
-    )
-      throw Error("Token Receiver Address must be simpleledger format")
+      !Array.isArray(config.tokenReceiverAddress)
+    ) {
+      if (!addy.isSLPAddress(config.tokenReceiverAddress))
+        throw Error("Token Receiver Address must be simpleledger format")
+    }
 
     // bulk tokenReceiverAddress
     if (
